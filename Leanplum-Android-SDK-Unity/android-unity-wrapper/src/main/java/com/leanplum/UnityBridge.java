@@ -44,6 +44,7 @@ import com.leanplum.callbacks.StartCallback;
 import com.leanplum.callbacks.VariableCallback;
 import com.leanplum.callbacks.VariablesChangedCallback;
 import com.leanplum.callbacks.MessageDisplayedCallback;
+import com.leanplum.models.MessageArchiveData;
 import com.leanplum.internal.ActionManager;
 import com.leanplum.internal.CollectionUtil;
 import com.leanplum.internal.Constants;
