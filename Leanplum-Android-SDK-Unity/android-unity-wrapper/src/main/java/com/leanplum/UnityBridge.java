@@ -43,6 +43,7 @@ import com.leanplum.callbacks.InboxSyncedCallback;
 import com.leanplum.callbacks.StartCallback;
 import com.leanplum.callbacks.VariableCallback;
 import com.leanplum.callbacks.VariablesChangedCallback;
+import com.leanplum.callbacks.MessageDisplayedCallback;
 import com.leanplum.internal.ActionManager;
 import com.leanplum.internal.CollectionUtil;
 import com.leanplum.internal.Constants;
@@ -450,6 +451,16 @@ public class UnityBridge {
         makeCallbackToUnity("VariableValueChanged:" + name);
       }
     });
+  }
+
+  public static void registerMessageDisplayedCallback(){
+    MessageDisplayedCallback callback = new MessageDisplayedCallback() {
+      @Override
+      public void messageDisplayed(MessageArchiveData messageArchiveData) {
+        makeCallbackToUnity("MessageDisplayed:");
+      }
+    };
+    Leanplum.addMessageDisplayedHandler(callback);
   }
 
   public static String varValue(String name) {
