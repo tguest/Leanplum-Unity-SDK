@@ -272,6 +272,16 @@ extern "C"
         strcpy(__LPgameObject, gameObject);
     }
 
+    void _registerMessageDisplayedCallback()
+    {
+        // Added custom: support for MessageDisplayed Native Callback
+        LeanplumMessageDisplayedCallbackBlock block = 
+        ^void(LPMessageArchiveData *messageArchiveData) {
+            UnitySendMessage(__LPgameObject, "NativeCallback", "MessageDisplayed:");
+        };
+        [Leanplum onMessageDisplayed:block];
+    }
+
     // Leanplum start actions
     void LeanplumSetupCallbackBlocks()
     {

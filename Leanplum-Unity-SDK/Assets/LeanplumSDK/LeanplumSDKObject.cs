@@ -404,6 +404,9 @@ namespace LeanplumSDK
         /// </summary>
         /// <param name="id"> The message Id. </param>
         public abstract bool ShowMessage(string id);
+
+        public virtual void RegisterMessageDisplayedCallback(Action callback) {}
+
         #endregion
 
         public virtual void NativeCallback(string message) {}
