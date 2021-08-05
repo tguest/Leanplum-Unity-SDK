@@ -153,6 +153,9 @@ namespace LeanplumSDK
         [DllImport ("__Internal")]
         internal static extern void _disableLocationCollection();
 
+        [DllImport("__Internal")]
+        internal static extern void _registerMessageDisplayedCallback();
+
 
         private LeanplumInbox inbox;
         public override LeanplumInbox Inbox
@@ -178,6 +181,7 @@ namespace LeanplumSDK
         private Dictionary<string, ActionContext.ActionResponder> ActionRespondersDictionary = new Dictionary<string, ActionContext.ActionResponder>();
         private Dictionary<string, List<ActionContext.ActionResponder>> OnActionRespondersDictionary = new Dictionary<string, List<ActionContext.ActionResponder>>();
         private Dictionary<string, ActionContext> ActionContextsDictionary = new Dictionary<string, ActionContext>();
+        private Dictionary<string, Action> MessageDisplayedCallbacksDictionary = new Dictionary<string, Action>();
 
         static private int DictionaryKey = 0;
 
@@ -630,6 +634,12 @@ namespace LeanplumSDK
             _forceContentUpdateWithCallback(key);
         }
 
+        public override void RegisterMessageDisplayedCallback(Action callback)
+        {
+            MessageDisplayedCallbacksDictionary.Add("MessageDisplayed:", callback);
+            _registerMessageDisplayedCallback();
+        }
+
         #endregion
 
         public override void NativeCallback(string message)
@@ -642,6 +652,7 @@ namespace LeanplumSDK
             const string DEFINE_ACTION_RESPONDER = "ActionResponder:";
             const string ON_ACTION_RESPONDER = "OnAction:";
             const string RUN_ACTION_NAMED_RESPONDER = "OnRunActionNamed:";
+            const string MESSAGE_DISPLAYED = "MessageDisplayed:";
 
             if (message.StartsWith(VARIABLES_CHANGED))
             {
@@ -728,6 +739,14 @@ namespace LeanplumSDK
                 {
                     var context = new ActionContextApple(actionKey, GetMessageIdFromMessageKey(actionKey));
                     parentContext.TriggerActionNamedResponder(context);
+                }
+            }
+            else if (message.StartsWith(MESSAGE_DISPLAYED))
+            {
+                Action callback;
+                if (MessageDisplayedCallbacksDictionary.TryGetValue(message, out callback))
+                {
+                    callback();
                 }
             }
 

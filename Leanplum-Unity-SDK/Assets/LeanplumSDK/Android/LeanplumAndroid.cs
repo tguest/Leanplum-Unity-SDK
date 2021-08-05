@@ -66,6 +66,7 @@ namespace LeanplumSDK
         private Dictionary<string, ActionContext.ActionResponder> ActionRespondersDictionary = new Dictionary<string, ActionContext.ActionResponder>();
         private Dictionary<string, List<ActionContext.ActionResponder>> OnActionRespondersDictionary = new Dictionary<string, List<ActionContext.ActionResponder>>();
         private Dictionary<string, ActionContext> ActionContextsDictionary = new Dictionary<string, ActionContext>();
+        private Dictionary<string, Action> MessageDisplayedCallbacksDictionary = new Dictionary<string, Action>();
 
         static private int DictionaryKey = 0;
         private string gameObjectName;
@@ -76,7 +77,7 @@ namespace LeanplumSDK
             nativeSdk = new AndroidJavaClass("com.leanplum.UnityBridge");
         }
 
-        #region Accessors and Mutators
+#region Accessors and Mutators
         /// <summary>
         ///     Gets a value indicating whether Leanplum has finished starting.
         /// </summary>
@@ -313,9 +314,9 @@ namespace LeanplumSDK
         {
             NativeSDK.CallStatic("disableLocationCollection");
         }
-        #endregion
+#endregion
 
-        #region API Calls
+#region API Calls
 
         /// <summary>
         ///     Call this when your application starts.
@@ -505,7 +506,13 @@ namespace LeanplumSDK
             NativeSDK.CallStatic("forceContentUpdateWithCallback", key);
         }
 
-        #endregion
+        public override void RegisterMessageDisplayedCallback(Action callback)
+        {
+            MessageDisplayedCallbacksDictionary.Add("MessageDisplayed:", callback);
+            NativeSDK.CallStatic("registerMessageDisplayedCallback");
+        }
+
+#endregion
 
         public override void NativeCallback(string message)
         {
@@ -517,6 +524,7 @@ namespace LeanplumSDK
             const string DEFINE_ACTION_RESPONDER = "ActionResponder:";
             const string ON_ACTION_RESPONDER = "OnAction:";
             const string RUN_ACTION_NAMED_RESPONDER = "OnRunActionNamed:";
+            const string MESSAGE_DISPLAYED = "MessageDisplayed:";
 
             if (message.StartsWith(VARIABLES_CHANGED))
             {
@@ -606,6 +614,14 @@ namespace LeanplumSDK
                     parentContext.TriggerActionNamedResponder(context);
                 }
             }
+            else if (message.StartsWith(MESSAGE_DISPLAYED))
+            {
+                Action callback;
+                if (MessageDisplayedCallbacksDictionary.TryGetValue(message, out callback))
+                {
+                    callback();
+                }
+            }
 
             if (Inbox != null)
             {
@@ -613,7 +629,7 @@ namespace LeanplumSDK
             }
         }
 
-        #region Dealing with Variables
+#region Dealing with Variables
 
         protected static IDictionary<string, Var> AndroidVarCache = new Dictionary<string, Var>();
 
@@ -771,7 +787,7 @@ namespace LeanplumSDK
             return messageId;
         }
 
-        #endregion
+#endregion
 
     }
 }
